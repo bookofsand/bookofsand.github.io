@@ -37,14 +37,30 @@
 
 <form action="/action_page.php">
   <label for="fname">Task:</label>
-  <input type="text" id="lname" name="lname">
+  <input type="text" id="task" name="lname">
   <label for="lname">Time Required:</label>
-  <input type="text" id="lname" name="lname">
-<button class="favorite styled"
+  <input type="text" id="time" name="lname">
+<button onclick="myfunction()"
         type="button">
     Add to favorites
 </button>
 </form>
+
+<div>
+<ul id="myUl">
+</ul>
+</div>
+
+<script>
+function myfunction(){
+var MyList = document.getElementsById("myUl");
+var li = document.createElement("li");
+var inputValue = document.getElementById("task").value;
+
+var t = document.createTextNode(inputValue);
+li.appendChild(t);
+}
+</script>
 
 </body>
 </html>
