@@ -35,15 +35,12 @@
 <h1> Shannon's to do list app </h1>
 <hr>
 
-<form action="/action_page.php">
+<form>
   <label for="fname">Task:</label>
   <input type="text" id="task" name="lname">
   <label for="lname">Time Required:</label>
   <input type="text" id="time" name="lname">
-<button onclick="myfunction()"
-        type="button">
-    Add to favorites
-</button>
+<button onclick="myfunction()" type="button">Add Task</button>
 </form>
 
 <div>
@@ -53,12 +50,14 @@
 
 <script>
 function myfunction(){
-var MyList = document.getElementById("myUl");
-var li = document.createElement("li");
-var inputValue = document.getElementById("task").value;
+  var MyList = document.getElementById("myUl");
 
-var t = document.createTextNode(inputValue);
-li.appendChild(t);
+  var li = document.createElement("li");
+  var inputValue = document.getElementById("task").value;
+
+  var t = document.createTextNode(inputValue);
+  li.appendChild(t);
+  MyList.appendChild(li);
 }
 </script>
 
