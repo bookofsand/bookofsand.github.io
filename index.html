@@ -28,7 +28,10 @@
     box-shadow: inset -2px -2px 3px rgba(255, 255, 255, .6),
                 inset 2px 2px 3px rgba(0, 0, 0, .6);
 }
+
 </style>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 
 </head>
 <body>
@@ -66,11 +69,21 @@ function myfunction(){
 
   li.appendChild(t);
   MyList.appendChild(li);
+
+  $.post("https://kvdb.io/VY5BHP73ruMyTXhcqGkAMh/waitinglist_" + inputValue, JSON.stringify(inputValue))
+    .done(function() {
+    alert('Thank you');
+  });
+
+  var prefix = 'waitinglist_';
+  $.getJSON("https://kvdb.io/VY5BHP73ruMyTXhcqGkAMh/?prefix=" + prefix + "&values=true&key=foobar", function(data) {
+    data.forEach(function(row) {
+      console.log(row);
+    });
+  });
+
 }
 </script>
 
 </body>
 </html>
-
-
-
