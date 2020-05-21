@@ -46,16 +46,24 @@
 <div>
 <ul id="myUl">
 </ul>
+<p>Total time required: </p><p id="totalTime"></p>
 </div>
 
 <script>
+var totalTime = 0;
+
 function myfunction(){
   var MyList = document.getElementById("myUl");
 
   var li = document.createElement("li");
   var inputValue = document.getElementById("task").value;
+  var timeValue = document.getElementById("time").value;
 
-  var t = document.createTextNode(inputValue);
+  var t = document.createTextNode(inputValue + " " + timeValue);
+  totalTime = totalTime + parseInt(timeValue);
+
+  document.getElementById("totalTime").innerHTML = totalTime;
+
   li.appendChild(t);
   MyList.appendChild(li);
 }
