@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <style>
 .styled {
@@ -19,33 +20,114 @@
     box-shadow: inset 2px 2px 3px rgba(255, 255, 255, .6),
                 inset -2px -2px 3px rgba(0, 0, 0, .6);
 }
-
 .styled:hover {
     background-color: rgba(255, 0, 0, 1);
 }
-
 .styled:active {
     box-shadow: inset -2px -2px 3px rgba(255, 255, 255, .6),
                 inset 2px 2px 3px rgba(0, 0, 0, .6);
 }
-
 </style>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js" type="text/javascript"></script>
 
+<script type="module">
+  var camera, scene, renderer;
+  var mesh;
+  var AMOUNT = 6;
+  init();
+  animate();
+
+  function init() {
+    var ASPECT_RATIO = window.innerWidth / window.innerHeight;
+    var WIDTH = ( window.innerWidth / AMOUNT ) * window.devicePixelRatio;
+    var HEIGHT = ( window.innerHeight / AMOUNT ) * window.devicePixelRatio;
+    var cameras = [];
+    for ( var y = 0; y < AMOUNT; y ++ ) {
+      for ( var x = 0; x < AMOUNT; x ++ ) {
+        var subcamera = new THREE.PerspectiveCamera( 40, ASPECT_RATIO, 0.1, 10 );
+        subcamera.viewport = new THREE.Vector4( Math.floor( x * WIDTH ), Math.floor( y * HEIGHT ), Math.ceil( WIDTH ), Math.ceil( HEIGHT ) );
+        subcamera.position.x = ( x / AMOUNT ) - 0.5;
+        subcamera.position.y = 0.5 - ( y / AMOUNT );
+        subcamera.position.z = 1.5;
+        subcamera.position.multiplyScalar( 2 );
+        subcamera.lookAt( 0, 0, 0 );
+        subcamera.updateMatrixWorld();
+        cameras.push( subcamera );
+      }
+    }
+
+    camera = new THREE.ArrayCamera( cameras );
+    camera.position.z = 3;
+    scene = new THREE.Scene();
+    scene.add( new THREE.AmbientLight( 0x222244 ) );
+    var light = new THREE.DirectionalLight();
+    light.position.set( 0.5, 0.5, 1 );
+    light.castShadow = true;
+    light.shadow.camera.zoom = 4; // tighter shadow map
+    scene.add( light );
+    var geometry = new THREE.PlaneBufferGeometry( 100, 100 );
+    var material = new THREE.MeshPhongMaterial( { color: 0x000066 } );
+    var background = new THREE.Mesh( geometry, material );
+    background.receiveShadow = true;
+    background.position.set( 0, 0, - 1 );
+    scene.add( background );
+    var geometry = new THREE.CylinderBufferGeometry( 0.5, 0.5, 1, 32 );
+    var material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
+    mesh = new THREE.Mesh( geometry, material );
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add( mesh );
+    renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild( renderer.domElement );
+    window.addEventListener( 'resize', onWindowResize, false );
+  }
+
+  function onWindowResize() {
+    var ASPECT_RATIO = window.innerWidth / window.innerHeight;
+    var WIDTH = ( window.innerWidth / AMOUNT ) * window.devicePixelRatio;
+    var HEIGHT = ( window.innerHeight / AMOUNT ) * window.devicePixelRatio;
+    camera.aspect = ASPECT_RATIO;
+    camera.updateProjectionMatrix();
+    for ( var y = 0; y < AMOUNT; y ++ ) {
+      for ( var x = 0; x < AMOUNT; x ++ ) {
+        var subcamera = camera.cameras[ AMOUNT * y + x ];
+        subcamera.viewport.set(
+          Math.floor( x * WIDTH ),
+          Math.floor( y * HEIGHT ),
+          Math.ceil( WIDTH ),
+          Math.ceil( HEIGHT ) );
+        subcamera.aspect = ASPECT_RATIO;
+        subcamera.updateProjectionMatrix();
+      }
+    }
+    renderer.setSize( window.innerWidth, window.innerHeight );
+  }
+
+  function animate() {
+    mesh.rotation.x += 0.005;
+    mesh.rotation.z += 0.01;
+    renderer.render( scene, camera );
+    requestAnimationFrame( animate );
+  }
+</script>
 </head>
+
 <body>
+
 <h1> Shannon's to do list app </h1>
 <hr>
-
 <form>
-  <label for="fname">Task:</label>
-  <input type="text" id="task" name="lname">
-  <label for="lname">Time Required:</label>
-  <input type="text" id="time" name="lname">
-<button onclick="myfunction()" type="button">Add Task</button>
+  <label>Task:</label>
+  <input type="text" id="task">
+  <label>Time Required:</label>
+  <input type="text" id="time">
+<button onclick="myfunction()" type="button" class="styled">Add Task</button>
 </form>
-
 <div>
 <ul id="myUl">
 </ul>
@@ -53,35 +135,32 @@
 </div>
 
 <script>
+function redrawMyUl(data) {
+  var myUl = document.getElementById("myUl");
+  data.forEach(function(row) {
+    var li = document.createElement("li");
+    li.appendChild(document.createTextNode(row[1]));
+    myUl.appendChild(li);
+  });
+}
+
 var totalTime = 0;
-
-function myfunction(){
-  var MyList = document.getElementById("myUl");
-
-  var li = document.createElement("li");
-  var inputValue = document.getElementById("task").value;
+function myfunction() {
+  var taskValue = document.getElementById("task").value;
   var timeValue = document.getElementById("time").value;
-
-  var t = document.createTextNode(inputValue + " " + timeValue);
+  var t = document.createTextNode(taskValue + " " + timeValue);
   totalTime = totalTime + parseInt(timeValue);
-
   document.getElementById("totalTime").innerHTML = totalTime;
 
-  li.appendChild(t);
-  MyList.appendChild(li);
-
-  $.post("https://kvdb.io/VY5BHP73ruMyTXhcqGkAMh/waitinglist_" + inputValue, JSON.stringify(inputValue))
-    .done(function() {
-    alert('Thank you');
-  });
-
   var prefix = 'waitinglist_';
-  $.getJSON("https://kvdb.io/VY5BHP73ruMyTXhcqGkAMh/?prefix=" + prefix + "&values=true&key=foobar", function(data) {
-    data.forEach(function(row) {
-      console.log(row);
+  $.post("https://kvdb.io/VY5BHP73ruMyTXhcqGkAMh/" + prefix + taskValue, JSON.stringify(taskValue))
+    .done(function() {
+      console.log(taskValue);
     });
-  });
 
+  $.getJSON("https://kvdb.io/VY5BHP73ruMyTXhcqGkAMh/?prefix=" + prefix + "&values=true&key=foobar", function(data) {
+      redrawMyUl(data);
+    });
 }
 </script>
 
